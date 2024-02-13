@@ -1,0 +1,154 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) throws Exception {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Введите выражение:");
+
+        String input = scanner.nextLine().toUpperCase();
+        boolean isArabic = input.matches(".*[0-9].*");
+        boolean isRoman = input.matches(".*[IVX].*");
+
+        if (input.contains(".") || input.contains(",")) {
+            throw new Exception("Калькулятор работает только с целыми числами");
+        }
+
+        if ((isArabic && isRoman) || (!isArabic && !isRoman)) {
+            throw new Exception("Калькулятор может работать только с арабскими или только с римскими цифрами.");
+        }
+        String[] parts = input.split("[\\+\\-\\*\\/]");
+
+        if (parts.length != 2) {
+            throw new Exception("Некорректный пример");
+        }
+
+        String operator = input.replaceAll("[^\\+\\-\\*\\/]", "");
+
+        if (isArabic) {
+            if (input.matches(".*[IVX].*")) {
+                throw new Exception("Используй только арабские цифры в арабском режиме.");
+            }
+        } else {
+            if (input.matches(".*[0-9].*")) {
+                throw new Exception("Используй только римские цифры в римском режиме.");
+            }
+        }
+
+
+        int number1, number2;
+
+        if (isArabic) {
+            number1 = (int) Math.round(Double.parseDouble(parts[0]));
+            number2 = (int) Math.round(Double.parseDouble(parts[1]));
+
+
+            if (number1 < 1) {
+                throw new Exception("Недопустимое значение первого числа");
+            }
+            if (number1 > 10) {
+                throw new Exception("Недопустимое значение первого числа");
+            }
+            if (number2 < 1) {
+                throw new Exception("Недопустимое значение второго числа");
+            }
+            if (number2 > 10) {
+                throw new Exception("Недопустимое значение вторго числа");
+            }
+
+
+        } else {
+            try {
+                number1 = RomanToArabic(parts[0]);
+                number2 = RomanToArabic(parts[1]);
+                if (number1 < 1) {
+                    throw new Exception("Недопустимое значение первого числа");
+                }
+                if (number1 > 10) {
+                    throw new Exception("Недопустимое значение первого числа");
+                }
+                if (number2 < 1) {
+                    throw new Exception("Недопустимое значение второго числа");
+                }
+                if (number2 > 10) {
+                    throw new Exception("Недопустимое значение вторго числа");
+                }
+            } catch (IllegalArgumentException e) {
+                throw new Exception("Некорректные римские числа.");
+            }
+        }
+
+        int result = 0;
+
+        switch (operator) {
+            case "+":
+                result = number1 + number2;
+                break;
+            case "-":
+                result = number1 - number2;
+                break;
+            case "*":
+                result = number1 * number2;
+                break;
+            case "/":
+                result = number1 / number2;
+                break;
+            default:
+                throw new Exception("Ошибка ввода!");
+        }
+
+        if (isArabic) {
+            System.out.println(input + "=" + result);
+        } else {
+            if (result <= 0) {
+                System.out.println("В римской системе исчисления нет отрицательных чисел и 0");
+            } else {
+                System.out.println(input + "=" + ArabicToRoman(result));
+            }
+        }
+    }
+
+    public static int RomanToArabic(String roman) {
+        Map<Character, Integer> romanMap = new HashMap<>();
+        romanMap.put('I', 1);
+        romanMap.put('V', 5);
+        romanMap.put('X', 10);
+        romanMap.put('L', 50);
+        romanMap.put('C', 100);
+
+        int result = 0;
+        int prevValue = 0;
+
+        for (int i = roman.length() - 1; i >= 0; i--) {
+            int value = romanMap.get(roman.charAt(i));
+            if (value < prevValue) {
+                result -= value;
+            } else {
+                result += value;
+            }
+            prevValue = value;
+        }
+
+        return result;
+    }
+
+    public static String ArabicToRoman(int arabic) {
+        if (arabic < 1) {
+            throw new IllegalArgumentException("В римской системе исчесления нет 0 и отрицательных чисел");
+        }
+
+        String[] romanSymbols = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+                "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX",
+                "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX",
+                "XXXI", "XXXII", "XXXIII", "XXXIV", "XXXV", "XXXVI", "XXXVII", "XXXVIII", "XXXIX", "XL",
+                "XLI", "XLII", "XLIII", "XLIV", "XLV", "XLVI", "XLVII", "XLVIII", "XLIX", "L",
+                "LI", "LII", "LIII", "LIV", "LV", "LVI", "LVII", "LVIII", "LIX", "LX",
+                "LXI", "LXII", "LXIII", "LXIV", "LXV", "LXVI", "LXVII", "LXVIII", "LXIX", "LXX",
+                "LXXI", "LXXII", "LXXIII", "LXXIV", "LXXV", "LXXVI", "LXXVII", "LXXVIII", "LXXIX", "LXXX",
+                "LXXXI", "LXXXII", "LXXXIII", "LXXXIV", "LXXXV", "LXXXVI", "LXXXVII", "LXXXVIII", "LXXXIX", "XC",
+                "XCI", "XCII", "XCIII", "XCIV", "XCV", "XCVI", "XCVII", "XCVIII", "XCIX", "C"};
+        return romanSymbols[arabic - 1];
+    }
+}
